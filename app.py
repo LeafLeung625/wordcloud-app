@@ -933,12 +933,12 @@ if __name__ == '__main__':
     # 创建必要的目录
     if not os.path.exists('static'):
         os.makedirs('static')
-    if not os.path.exists('logs'):
-        os.makedirs('logs')
+    if not os.path.exists('data'):
+        os.makedirs('data')
 
-    # 获取配置
+    # 获取配置（Railway 会设置 PORT 环境变量）
     host = app.config.get('HOST', '0.0.0.0')
-    port = app.config.get('PORT', 5000)
+    port = int(os.environ.get('PORT', app.config.get('PORT', 5000)))
     debug = app.config.get('DEBUG', False)
 
     # 运行Flask应用
