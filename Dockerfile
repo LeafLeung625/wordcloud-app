@@ -2,18 +2,36 @@ FROM python:3.9-slim
 
 WORKDIR /app
 
-# 安装依赖
+# 安装系统依赖和中文语言包
+RUN apt-get update && apt-get install -y \
+    gcc \
+    fonts-wqy-microhei \
+    fonts-wqy-zenhei \
+    && rm -rf /var/lib/apt/lists/* \
+    && fc-cache -fv
+
+# 复制依赖文件
 COPY requirements.txt .
+
+# 安装Python依赖
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 复制代码
+# 复制应用代码
 COPY app.py .
 COPY config.py .
+COPY gunicorn_config.py .
 
-# Railway 会自动设置 PORT 环境变量，默认使用 8000
-ENV PORT=8000
+# 创建空目录
+RUN mkdir -p static logs data
 
-EXPOSE 8000
+# 暴露端口
+EXPOSE 5000
 
-# 直接运行 python 应用
-CMD ["python", "app.py"]
+# 设置环境变量
+ENV FLASK_APP=app.py
+ENV FLASK_ENV=production
+ENV PYTHONUNBUFFERED=1
+ENV PORT=5000
+
+# 使用Gunicorn启动
+CMD ["gunicorn", "-c", "gunicorn_config.py", "app:app"]
